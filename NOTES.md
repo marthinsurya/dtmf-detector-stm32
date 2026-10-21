@@ -1,11 +1,21 @@
-## GIT notes
-# start
-git init
-git add filename
-git commit -m "message" -m "description"
-git remote add (origin linkgithub)
-git push (-u origin main) 
+# GIT notes
+git status : check status of the files untracked etc
+## setup folder
+git init : initiate the folder
+.gitignore file : contains files to ignore in git command
+
+## staging file (still offline - hidden folder)
+git add <filename> : add a file into git
+git commit -m "message" -m "description" : stage the file
+
+## link to remote
+git remote add origin <link-github> : link to the github
+
+## push to remote
+git push (-u origin main) : push to remote (use origin main only for first push)
 
 
-## GLOSSARY
+
+# GLOSSARY
 DTMF -  Dual-Tone Multi-Frequency
+
