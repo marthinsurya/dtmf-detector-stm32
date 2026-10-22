@@ -23,7 +23,7 @@ git log --oneline (-n): list of push history (check n number of cinnut history)
 ## git branch
 git switch (-c) <name> : switch to branch (-c create new bran)
 git branch : list of branches, * marks the current one
-
+git stash shelves the edits, then you switch branch, then git stash pop brings them back onto the branch you want. This is best when you’re on the wrong branch with uncommited changes.
 
 
 ## python
