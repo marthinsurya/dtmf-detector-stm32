@@ -1,4 +1,5 @@
 import math
+import random
 
 FS = 8000
 F_LOW = (697, 770, 852, 941)
@@ -27,4 +28,12 @@ def make_signal(key, duration_s):
     fl, fh = freqs_for(key)
     return key_tone(fl, fh, n_samples)
 
-print(len(make_signal('5', 0.1)))
+def add_noise(signal, sigma):
+    out = []
+    for s in signal:
+        noisy = s + random.gauss(0, sigma)
+        out.append(noisy)
+    return out
+
+
+print(add_noise([0,0,0], 0.5))
