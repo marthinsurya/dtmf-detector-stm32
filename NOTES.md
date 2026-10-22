@@ -16,8 +16,9 @@ git remote add origin <link-github> : link to the github
 ## push to remote
 git push (-u origin main) : push to remote (use origin main only for first push)
 
-## list history
+## git check
 git log --oneline : list of push history
+git ls-tree --name-only <main/branch>
 
 # GLOSSARY
 DTMF -  Dual-Tone Multi-Frequency
