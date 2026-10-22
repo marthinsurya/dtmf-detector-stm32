@@ -62,5 +62,15 @@ def detect(signal):
     col = energies_high.index(max(energies_high))
     return KEYS[row][col]
 
-sig = make_signal('5', 0.1)
-print(detect(sig))
+def accuracy(snr_db, trials):
+    correct = 0
+    for _ in range(trials):
+        key = random.choice("123456789ABC*0#D")
+        sig = make_signal(key, 0.1)
+        sig_w_noise = add_noise_snr(sig, snr_db)
+        if key == detect(sig_w_noise):
+            correct += 1
+    return correct/trials
+
+for snr in (0, -10, -15, -20, -25):
+    print(snr, accuracy(snr, 200))
