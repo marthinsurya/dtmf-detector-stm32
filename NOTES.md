@@ -5,17 +5,17 @@ git init : initiate the folder
 create .gitignore file : contains files to ignore in git command
 
 ## staging file (still offline - hidden folder)
-git add <file> : add a file into git
+git add <file1> <file2>: add a file into git
 git commit -m "message" -m "description" : stage the file
 
 git commit -a -m "msg" : combining add and commit action (only to already traced files, new files will be skip)
 git commit --amend -m "msg" : change rewrite last commit (before push)
 
 ## link to remote
-git remote add origin <link> : link to the github
+git remote add <origin> <link> : link to the github nicknamed "origin"
 
 ## push to remote
-git push (-u origin main) : push to remote (use origin main only for first push)
+git push (-u <origin> <main/branch-name>) : push to remote (use origin main only for first push)
 
 ## list history
 git log --oneline (-n): list of push history (check n number of cinnut history)
