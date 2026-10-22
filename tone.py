@@ -55,4 +55,12 @@ def tone_energy(signal, f):
         im += s * math.sin(2*math.pi*f*n/FS)
     return re**2 + im**2
 
+def detect(signal):
+    energies_low = [tone_energy(signal, f) for f in F_LOW]
+    energies_high = [tone_energy(signal, f) for f in F_HIGH]
+    row = energies_low.index(max(energies_low))
+    col = energies_high.index(max(energies_high))
+    return KEYS[row][col]
+
 sig = make_signal('5', 0.1)
+print(detect(sig))
