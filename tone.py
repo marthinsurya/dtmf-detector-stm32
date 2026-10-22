@@ -22,4 +22,9 @@ def freqs_for(key):
             return key_freqs(row, col)
     raise ValueError("bad key")
 
-print(freqs_for('5'))
+def make_signal(key, duration_s):
+    n_samples = int(FS*duration_s)
+    fl, fh = freqs_for(key)
+    return key_tone(fl, fh, n_samples)
+
+print(len(make_signal('5', 0.1)))
