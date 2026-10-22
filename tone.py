@@ -35,5 +35,14 @@ def add_noise(signal, sigma):
         out.append(noisy)
     return out
 
+def power(x):
+    sq_x_total = 0
+    for s in x:
+        sq_x_total += s**2
+    return sq_x_total/len(x)
 
-print(add_noise([0,0,0], 0.5))
+def add_noise_snr(signal, snr_db):
+    p_signal = power(signal)
+    p_noise = p_signal/10**(snr_db/10)
+    sigma = math.sqrt(p_noise)
+    return add_noise(signal, sigma)
