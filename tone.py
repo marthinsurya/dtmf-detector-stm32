@@ -72,5 +72,6 @@ def accuracy(snr_db, trials):
             correct += 1
     return correct/trials
 
-for snr in (0, -10, -15, -20, -25):
-    print(snr, accuracy(snr, 200))
+if __name__ == "__main__":
+    for snr in (0, -10, -15, -20, -25):
+        print(snr, accuracy(snr, 200))
