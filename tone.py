@@ -3,6 +3,7 @@ import math
 FS = 8000
 F_LOW = (697, 770, 852, 941)
 F_HIGH = (1209, 1336, 1477, 1633)
+KEYS = ("123A", "456B", "789C", "*0#D")
 
 def key_tone(fl, fh, n_samples):
     samples = []
@@ -14,8 +15,11 @@ def key_tone(fl, fh, n_samples):
 def key_freqs(row, col):
     return F_LOW[row], F_HIGH[col]
 
+def freqs_for(key):
+    for row, line in enumerate(KEYS):
+        col = line.find(key)
+        if col != -1:
+            return key_freqs(row, col)
+    raise ValueError("bad key")
 
-print(key_tone(770, 1336, 8))
-
-fl, fh = key_freqs(1,1)
-print(key_tone(fl, fh, 4))
+print(freqs_for('5'))
