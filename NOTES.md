@@ -31,6 +31,7 @@ python --version
 python xxxx.py : run the python file
 write constant in capital so people know it never changes (eg. FS = 8000)
 Tuple, F = (697, 770). A tuple can’t be modified, different from list [value]. Indexing F[1] works the same.
+python -c "import matplotlib; print(matplotlib.__version__)" : check if install and import correctly
 
 
 # GLOSSARY
