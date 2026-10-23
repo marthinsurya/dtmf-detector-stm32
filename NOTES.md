@@ -26,7 +26,7 @@ git switch (-c) <name> : switch to branch (-c create new bran)
 git branch : list of branches, * marks the current one
 git stash : shelves the edits, then you switch branch, then git stash pop brings them back onto the branch you want. This is best when you’re on the wrong branch with uncommited changes.
 git branch -vv
-git merge main : merge branch to main
+git merge main : merge main to branch (solve conflict) - then push - and pull from main
 
 ## misc
 git rm <file> : remove file
