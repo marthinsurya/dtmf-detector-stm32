@@ -26,8 +26,7 @@ git switch (-c) <name> : switch to branch (-c create new bran)
 git branch : list of branches, * marks the current one
 git stash : shelves the edits, then you switch branch, then git stash pop brings them back onto the branch you want. This is best when you’re on the wrong branch with uncommited changes.
 git branch -vv
-git log origin/main..main --oneline : shows commits that are on local main but not yet on GitHub’s main. Empty output means they’re in sync.
-git diff main <branch> --stat :difference between main-branch
+git merge main : merge branch to main
 
 ## misc
 git rm <file> : remove file
@@ -40,6 +39,11 @@ write constant in capital so people know it never changes (eg. FS = 8000)
 Tuple, F = (697, 770). A tuple can’t be modified, different from list [value]. Indexing F[1] works the same.
 python -c "import matplotlib; print(matplotlib.__version__)" : check if install and import correctly
 
+## git check
+git log --oneline : list of push history
+git ls-tree --name-only <main/branch>
+git log origin/main..main --oneline : shows commits that are on local main but not yet on GitHub’s main. Empty output means they’re in sync.
+git diff main <branch> --stat :difference between main-branch
 
 # GLOSSARY
 DTMF -  Dual-Tone Multi-Frequency
