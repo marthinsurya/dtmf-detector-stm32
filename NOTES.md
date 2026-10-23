@@ -18,7 +18,8 @@ git remote add <origin> <link> : link to the github nicknamed "origin"
 git push (-u <origin> <main/branch-name>) : push to remote (use origin main only for first push)
 
 ## list history
-git log --oneline (-n): list of push history (check n number of cinnut history)
+git log --oneline (-n): list of push history (check n number of xommir history)
+git log --all --name-only --pretty=format: | sort -u : check file name in the file
 
 ## git branch
 git switch (-c) <name> : switch to branch (-c create new bran)
