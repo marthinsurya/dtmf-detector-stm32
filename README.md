@@ -1,9 +1,15 @@
 # DTMF tone detector: Python → C → STM32
 
-Detects keypad keys from DTMF tone pairs in noise. Built three times with the same method: a Python reference, C on PC (float, Q15), and C on an STM32F407, with accuracy, error vs Python and cycles per block measured.
+Detects which keypad key was pressed from its DTMF tone pair in noise. The same detection method is built three times, each under tighter constraints, to measure what each constraint costs and how much of it design choices win back.
+
+## Steps and goals
+1. **Python reference** (no hardware limits): tone generator, noise, detector, accuracy vs SNR. This is the best result the later steps are compared against.
+2. **C on PC** (g++): float first, then Q15 fixed-point. Goal: error vs Python, and fixing fixed-point problems (overflow, coefficient rounding, block length).
+3. **STM32F407**: keypad -> DAC tone -> jumper wire -> ADC -> detector, float and Q15. Goal: accuracy and cycles per block (DWT counter) against the real-time budget, with real ADC/DAC effects included.
 
 ## Status
-- [x] Step 1: Python reference
+- [x] Step 1: Python reference (generator, noise, direct energy detector, accuracy vs SNR)
+- [ ] Step 1b: Goertzel in Python, checked against the direct detector (the version ported to C)
 - [ ] Step 2: C on PC (float, Q15)
 - [ ] Step 3: STM32F407
 
@@ -26,9 +32,12 @@ The algorithm will pick the strongest frequency from each group to determine whi
 
 ## Results
 ### Step 1 - Python Reference 
+
+Step 1 is the baseline: the signal is processed in floating-point Python with no hardware restrictions, but with noise added. It shows how well the method detects keys at best, so steps 2 and 3 can be compared against it.
+
 ![Accuracy vs SNR](accuracy_vs_snr.png)
 
-As shown in figure, accuracy drops as noise level increases. The result was accurate when the noise is lower (>-15 dB), 100% at -10 dB and above. The performance dropped significantly as higher noise was introduced, 41.5% at -20 dB, near chance (6.25%) at -30 dB.
+Accuracy drops as noise increases: 100% at -10 dB and above, 90% at -15 dB, 41.5% at -20 dB, and near chance (6.25%) at -30 dB.
 
 | SNR (dB) | accuracy |
 |---|---|
