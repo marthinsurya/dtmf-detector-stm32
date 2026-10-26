@@ -9,7 +9,7 @@ Detects which keypad key was pressed from its DTMF tone pair in noise. The same 
 
 ## Status
 - [x] Step 1: Python reference (generator, noise, direct energy detector, accuracy vs SNR)
-- [ ] Step 1b: Goertzel in Python, checked against the direct detector (the version ported to C)
+- [x] Step 1b: Goertzel in Python (`goertzel.py`), same accuracy table as the direct detector on identical test data; this is the version ported to C
 - [ ] Step 2: C on PC (float, Q15)
 - [ ] Step 3: STM32F407
 
@@ -48,6 +48,8 @@ Accuracy drops as noise increases: 100% at -10 dB and above, 90% at -15 dB, 41.5
 | -10 | 1.0 |
 | -5 | 1.0 |
 | 0 | 1.0 |
+
+The Goertzel detector (step 1b) gives the same table on the same noisy signals. Its energies match the direct method to rounding error (relative difference ~1e-12), so this table is the reference for steps 2 and 3.
 
 ## How to reproduce
 ```bash
