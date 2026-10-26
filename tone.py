@@ -55,20 +55,20 @@ def tone_energy(signal, f):
         im += s * math.sin(2*math.pi*f*n/FS)
     return re**2 + im**2
 
-def detect(signal):
-    energies_low = [tone_energy(signal, f) for f in F_LOW]
-    energies_high = [tone_energy(signal, f) for f in F_HIGH]
+def detect(signal, energy_fn=tone_energy):
+    energies_low = [energy_fn(signal, f) for f in F_LOW]
+    energies_high = [energy_fn(signal, f) for f in F_HIGH]
     row = energies_low.index(max(energies_low))
     col = energies_high.index(max(energies_high))
     return KEYS[row][col]
 
-def accuracy(snr_db, trials):
+def accuracy(snr_db, trials, energy_fn=tone_energy):
     correct = 0
     for _ in range(trials):
         key = random.choice("123456789ABC*0#D")
         sig = make_signal(key, 0.1)
         sig_w_noise = add_noise_snr(sig, snr_db)
-        if key == detect(sig_w_noise):
+        if key == detect(sig_w_noise, energy_fn):
             correct += 1
     return correct/trials
 
