@@ -17,6 +17,37 @@ float goertzel_energy(const float *x, int n, float f) {
     return s1*s1+s2*s2-coeff*s1*s2;; 
 }
 
+float f_low[4]  = {697.0f, 770.0f, 852.0f, 941.0f};
+float f_high[4] = {1209.0f, 1336.0f, 1477.0f, 1633.0f};
+const char keys[4][4] = {
+    {'1','2','3','A'},
+    {'4','5','6','B'},
+    {'7','8','9','C'},
+    {'*','0','#','D'}
+};
+
+char detect(const float *x, int n){
+    int best_low = 0;
+    int best_high = 0;
+    float e_low[4];
+    float e_high[4];
+
+    for (int i = 0; i < 4; i++) {
+        e_low[i] = goertzel_energy(x, n, f_low[i]);
+        e_high[i] = goertzel_energy(x, n, f_high[i]);
+    }
+
+    for (int i = 1; i < 4; i++) {
+        if (e_low[i]>e_low[best_low]){
+            best_low = i;
+        }
+        if (e_high[i]>e_high[best_high]){
+            best_high = i;
+        }
+    }
+    return keys[best_low][best_high];
+}
+
 int main(void){
     FILE *f = fopen("c/signals.txt", "r");
     if (f == NULL) {
@@ -37,7 +68,9 @@ int main(void){
             }
         }
         line++;
-        printf("line %d: key %c, snr %d, E697 = %f\n", line, key, snr, goertzel_energy(x, 800, 697.0f));
+        // printf("line %d: key %c, snr %d, E697 = %f\n", line, key, snr, goertzel_energy(x, 800, 697.0f));
+        char got = detect(x, 800);
+        printf("line %d: snr %d, expected %c, detected %c\n", line, snr, key, got);
     }
     
     fclose(f);
