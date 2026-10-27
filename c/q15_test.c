@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <math.h>
 
 int16_t float_to_q15(float x) {
     float scaled = x * 32768.0f;
@@ -9,17 +10,16 @@ int16_t float_to_q15(float x) {
     if (scaled < -32768.0f) {
         scaled = -32768.0f;
     }
-    return (int16_t)scaled;
+    return (int16_t)roundf(scaled);
 }
 
 int main(void) {
-    float z[3] = {-3.0f, 1.0f, 2.5f};
+    float x[3] = {-3, 1, 2.5};
 
-    for (int i = 0; i < 3; i++){
-        float x = z[i];
-        int16_t q = float_to_q15(x);
-        float back = q / 32768.0f;
-        printf("x = %f, q = %d, back = %f\n", x, q, back);
+    for (int i=0; i<3; i++){
+        int16_t z = float_to_q15(x[i]);
+        printf("val = %d\n", z);
     }
+
     return 0;
 }
