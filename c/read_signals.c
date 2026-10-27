@@ -1,4 +1,21 @@
 #include <stdio.h>
+#include <math.h>
+
+#define PI_F 3.14159265f
+
+float goertzel_energy(const float *x, int n, float f) {
+    float fs = 8000.0f;
+    float coeff = 2*cosf(2*PI_F*f/fs);  
+    float s0 = 0.0f;
+    float s1 = 0.0f;
+    float s2 = 0.0f;
+    for (int i = 0; i < n; i++) {
+        s0 = x[i] + coeff*s1 - s2;
+        s2 = s1;
+        s1 = s0;
+    }
+    return s1*s1+s2*s2-coeff*s1*s2;; 
+}
 
 int main(void){
     FILE *f = fopen("c/signals.txt", "r");
@@ -20,7 +37,7 @@ int main(void){
             }
         }
         line++;
-        printf("line %d: key %c, snr %d, x[0]=%f\n", line, key, snr, x[0]);
+        printf("line %d: key %c, snr %d, E697 = %f\n", line, key, snr, goertzel_energy(x, 800, 697.0f));
     }
     
     fclose(f);
