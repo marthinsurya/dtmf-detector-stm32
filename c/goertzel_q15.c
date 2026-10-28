@@ -8,6 +8,7 @@
 #define KEYS_PER_SNR 16
 #define NUM_TONES 4
 #define NUM_SNRS 4
+#define INPUT_SCALE 0.25f
 
 int16_t float_to_q15(float x) {
     float scaled = x * 32768.0f;
@@ -20,16 +21,6 @@ int16_t float_to_q15(float x) {
     return (int16_t)roundf(scaled);
 }
 
-int16_t q15_mul(int16_t a, int16_t b){
-    int32_t scaled = a*b >> 15;
-    if (scaled > 32767) {
-        scaled = 32767;
-    }
-    if (scaled < -32768) {
-        scaled = -32768;
-    }
-    return (int16_t)scaled;
-}
 
 // float q15_goertzel_energy(const float *x, int n, float f) {
 //     int16_t coeff_half = float_to_q15(cosf(2*PI_F*f/FS));
@@ -75,6 +66,7 @@ int main(void) {
             float x[N];
             int32_t s1 = 0;
             int32_t s2 = 0;
+            //Read 1 signal
             for (int i = 0; i < N; i++) {
                 int ok = fscanf(fp, "%f", &x[i]);
                 if (ok != 1) {
@@ -82,13 +74,16 @@ int main(void) {
                     fclose(fp);
                     return 1;
                 }             
-       
-                int16_t s = float_to_q15(x[i]);
-                int32_t s0 = s + 2*q15_mul(coeff_half_low,s1) - s2;
+            }
+            //Process signal
+            for (int i = 0; i < N; i++) {
+                int16_t s = float_to_q15(x[i] * INPUT_SCALE);
+                int32_t s0 = s + (int32_t)(((int64_t)coeff_half_low * s1) >> 14) - s2;
                 s2 = s1;
                 s1 = s0; 
             }
-            printf("s1 = %d, s2 = %d", s1, s2);
+            
+            printf("s1 = %d, s2 = %d\n", s1, s2);
         }
     }
     return 0;
