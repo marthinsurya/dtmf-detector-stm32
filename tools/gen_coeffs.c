@@ -1,3 +1,7 @@
+// Prints the Q15 Goertzel coefficients cos(2*pi*f/FS) for the 8 DTMF tones.
+// Paste the values into coeff_low / coeff_high in c/goertzel_q15.c.
+// Build: gcc -Wall -Wextra -o tools/gen_coeffs.exe tools/gen_coeffs.c -lm
+// Run:   ./tools/gen_coeffs.exe
 #include <stdio.h>
 #include <stdint.h>
 #include <math.h>
