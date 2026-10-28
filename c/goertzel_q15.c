@@ -22,7 +22,7 @@ int16_t float_to_q15(float x) {
 }
 
 
-void q15_goertzel_state(const float *x, int n, float f, int32_t *s1, int32_t *s2){
+int64_t q15_goertzel_state(const float *x, int n, float f, int32_t *s1, int32_t *s2){
     int16_t coeff_half = float_to_q15(cosf(2*PI_F*f/FS));
     *s1 = 0;
     *s2 = 0;
@@ -33,6 +33,10 @@ void q15_goertzel_state(const float *x, int n, float f, int32_t *s1, int32_t *s2
         *s2 = *s1;
         *s1 = s0; 
     }
+
+    int64_t term = ((int64_t)coeff_half * *s1) >> 14; // coeff*s1
+    int64_t energy = (int64_t)*s1 * *s1 + (int64_t)*s2* *s2 - term * *s2;
+    return energy;
 }
 
 
@@ -72,8 +76,10 @@ int main(void) {
         //Process signal
         for (int i = 0; i < NUM_TONES; i++) {
             int32_t s1, s2;
-            q15_goertzel_state(x, N, f_low[i], &s1, &s2);
-            printf("s1 = %d, s2 = %d\n", s1, s2);
+                        
+            int64_t energy = q15_goertzel_state(x, N, f_low[i], &s1, &s2);
+            printf("s1 = %d, s2 = %d, energy = %.0f\n", s1, s2, (double)energy);
+           
         }
         count++;             
     }
