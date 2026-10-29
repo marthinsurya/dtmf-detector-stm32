@@ -10,7 +10,7 @@ Detects which keypad key was pressed from its DTMF tone pair in noise. The same 
 ## Status
 - [x] Step 1a: Signal generation & direct correlation detector in Python (`tone.py` - generator, noise, direct energy detector `tone_energy`, accuracy vs SNR)
 - [x] Step 1b: Goertzel method detector in Python (`goertzel.py`), same accuracy table as the direct detector on identical test data; this is the version ported to C
-- [ ] Step 2: C on PC (float, Q15)
+- [ ] Step 2: C on PC (float `read_signals.c`, Q15 `goertzel_q15.c`): both detectors done and compared with Python on the same 1400 signals (results below); release v0.3 pending
 - [ ] Step 3: STM32F407
 
 ## Method
@@ -37,26 +37,45 @@ Step 1 is the baseline: the signal is processed in floating-point Python with no
 
 ![Accuracy vs SNR](accuracy_vs_snr.png)
 
-Accuracy drops as noise increases: 100% at -10 dB and above, 90% at -15 dB, 41.5% at -20 dB, and near chance (6.25%) at -30 dB.
+Accuracy drops as noise increases: 100% at -10 dB and above, 88% at -15 dB, 39.5% at -20 dB, 21% at -25 dB, and 11.5% at -30 dB, about twice chance (6.25%).
 
-| SNR (dB) | accuracy |
+| SNR (dB) | Python (hits of 200) |
 |---|---|
-| -30 | 0.07 |
-| -25 | 0.155 |
-| -20 | 0.415 |
-| -15 | 0.9 |
-| -10 | 1.0 |
-| -5 | 1.0 |
-| 0 | 1.0 |
+| 0 | 200 |
+| -5 | 200 |
+| -10 | 200 |
+| -15 | 176 |
+| -20 | 79 |
+| -25 | 42 |
+| -30 | 23 |
 
 The Goertzel detector (step 1b) gives the same table on the same noisy signals. Its energies match the direct method (step 1a) to rounding error (relative difference ~1e-12), so this table is the baseline reference for steps 2 and 3.
 
 ## How to reproduce
+Run from the repo root:
 ```bash
-python plot_accuracy.py
+python python/export_signals.py
+python python/read_signals.py
+gcc -Wall -Wextra -o c/read_signals c/read_signals.c -lm
+gcc -Wall -Wextra -o c/goertzel_q15 c/goertzel_q15.c -lm
+./c/read_signals
+./c/goertzel_q15
 ```
-Prints the table values and saves `accuracy_vs_snr.png`.
+`export_signals.py` writes the test signals to `c/signals.txt`. `read_signals.py` and the two C programs print hits per SNR in the same format, so the outputs can be compared directly; `read_signals.py` also saves `accuracy_vs_snr.png`.
 
 ### Step 2 - Fixed-Point implementation
-Test data was generated for 7 SNR, 200 trials per SNR - total 1400 signals (written to c/signals.txt). 
-To generate: run "python python/export_signals.py"
+Test data: 7 SNRs x 200 trials = 1400 signals, written to `c/signals.txt` (not in git; generate it with `python python/export_signals.py`, see How to reproduce).
+
+The table shows hits out of 200 trials per SNR for the Goertzel detector in noise:
+
+| SNR (dB) | Python & C float | C Q15 |
+|---|---|---|
+| 0 | 200 | 200 |
+| -5 | 200 | 200 |
+| -10 | 200 | 199 |
+| -15 | 176 | 161 |
+| -20 | 79 | 60 |
+| -25 | 42 | 30 |
+| -30 | 23 | 20 |
+
+All three use the same 1400 signals, and Python and C float give identical detection. Q15 loses accuracy at low SNR, starting at -10 dB and largest at -20 dB (9.5 percentage points). Over all 1400 signals Q15 averages 3.6 percentage points lower accuracy than float (50 more misses). The likely cause is the input scaling of 0.25, which reduces the signal's resolution (fewer bits).
