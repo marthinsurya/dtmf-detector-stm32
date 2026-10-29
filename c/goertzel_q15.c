@@ -24,7 +24,7 @@ int16_t float_to_q15(float x) {
 
 // f_low  = {697, 770, 852, 941};
 // f_high = {1209, 1336, 1477, 1633};
-// coeff = cos(2*pi*f/FS) in Q15, FS = 8000 (tools/gen_coeffs.c)
+// coeff = cos(2*pi*f/FS) in Q15, FS = 8000 (c/tools/gen_coeffs.c)
 static const int16_t coeff_low[NUM_TONES]  = {27980, 26956, 25701, 24219};
 static const int16_t coeff_high[NUM_TONES] = {19073, 16325, 13085, 9315};
 
