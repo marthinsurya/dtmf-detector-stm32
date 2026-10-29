@@ -5,9 +5,9 @@
 #define FS 8000.0f
 #define PI_F 3.14159265f
 #define N 800
-#define KEYS_PER_SNR 16
+#define KEYS_PER_SNR 200
 #define NUM_TONES 4
-#define NUM_SNRS 4
+#define NUM_SNRS 7
 #define INPUT_SCALE 0.25f
 
 int16_t float_to_q15(float x) {
@@ -88,7 +88,7 @@ int main(void) {
     char key;
     int snr;
     int line = 0;
-    int correct[NUM_SNRS] = {0, 0, 0, 0};
+    int correct[NUM_SNRS] = {0};
     int snrs[NUM_SNRS];
         
     while (fscanf(fp, " %c %d", &key, &snr) == 2) {

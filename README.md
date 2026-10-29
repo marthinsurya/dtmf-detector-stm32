@@ -56,3 +56,7 @@ The Goertzel detector (step 1b) gives the same table on the same noisy signals. 
 python plot_accuracy.py
 ```
 Prints the table values and saves `accuracy_vs_snr.png`.
+
+### Step 2 - Fixed-Point implementation
+Test data was generated for 7 SNR, 200 trials per SNR - total 1400 signals (written to c/signals.txt). 
+To generate: run "python python/export_signals.py"
