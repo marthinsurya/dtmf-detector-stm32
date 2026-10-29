@@ -4,9 +4,9 @@
 #define FS 8000.0f
 #define PI_F 3.14159265f
 #define N 800
-#define KEYS_PER_SNR 16
+#define KEYS_PER_SNR 200
 #define NUM_TONES 4
-#define NUM_SNRS 4
+#define NUM_SNRS 7
 
 float goertzel_energy(const float *x, int n, float f) {
     float coeff = 2*cosf(2*PI_F*f/FS);
@@ -62,7 +62,7 @@ int main(void) {
     char key;
     int snr;
     int line = 0;
-    int correct[NUM_SNRS] = {0, 0, 0, 0};
+    int correct[NUM_SNRS] = {0};
     int snrs[NUM_SNRS];
 
     while (fscanf(fp, " %c %d", &key, &snr) == 2) {
