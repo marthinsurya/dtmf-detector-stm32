@@ -10,7 +10,7 @@ Detects which keypad key was pressed from its DTMF tone pair in noise. The same 
 ## Status
 - [x] Step 1a: Signal generation & direct correlation detector in Python (`tone.py` - generator, noise, direct energy detector `tone_energy`, accuracy vs SNR)
 - [x] Step 1b: Goertzel method detector in Python (`goertzel.py`), same accuracy table as the direct detector on identical test data; this is the version ported to C
-- [ ] Step 2: C on PC (float `read_signals.c`, Q15 `goertzel_q15.c`): both detectors done and compared with Python on the same 1400 signals (results below); release v0.3 pending
+- [x] Step 2: C on PC (float `read_signals.c`, Q15 `goertzel_q15.c`) vs Python on the same 1400 signals, v0.3
 - [ ] Step 3: STM32F407
 
 ## Method
