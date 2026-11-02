@@ -22,6 +22,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
+#include <dtmf.h>
+#include "test_signal.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -31,7 +33,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define N 800
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -92,15 +94,15 @@ int main(void)
   DWT->CTRL  |= DWT_CTRL_CYCCNTENA_Msk;             // start counting
 
   uint32_t start = DWT->CYCCNT;
-  for (volatile int i = 0; i < 1000; i++) { }
+  char key = detect(test_signal, N);
   uint32_t cycles = DWT->CYCCNT - start;
 
-  char buf[32];
-  snprintf(buf, sizeof buf, "cycles %lu\n", (unsigned long)cycles);
+  char buf[48];
+  snprintf(buf, sizeof buf, "key %c, cycles %lu\n", key, (unsigned long)cycles);
+
   for (const char *p = buf; *p; p++) {
       ITM_SendChar(*p);
   }
-
   /* USER CODE END 2 */
 
   /* Infinite loop */
