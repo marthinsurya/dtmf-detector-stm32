@@ -21,7 +21,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -87,6 +87,19 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
+  CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;  // enable the trace/debug block
+  DWT->CYCCNT = 0;                                  // reset the counter
+  DWT->CTRL  |= DWT_CTRL_CYCCNTENA_Msk;             // start counting
+
+  uint32_t start = DWT->CYCCNT;
+  for (volatile int i = 0; i < 1000; i++) { }
+  uint32_t cycles = DWT->CYCCNT - start;
+
+  char buf[32];
+  snprintf(buf, sizeof buf, "cycles %lu\n", (unsigned long)cycles);
+  for (const char *p = buf; *p; p++) {
+      ITM_SendChar(*p);
+  }
 
   /* USER CODE END 2 */
 
