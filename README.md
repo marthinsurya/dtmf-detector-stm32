@@ -63,19 +63,36 @@ gcc -Wall -Wextra -o c/goertzel_q15 c/goertzel_q15.c -lm
 ```
 `export_signals.py` writes the test signals to `c/signals.txt`. `read_signals.py` and the two C programs print hits per SNR in the same format, so the outputs can be compared directly; `read_signals.py` also saves `accuracy_vs_snr.png`.
 
+To try another Q15 input scale, override it at compile time (in PowerShell):
+```bash
+gcc "-DINPUT_SCALE=0.125f" -o c/goertzel_q15 c/goertzel_q15.c -lm
+```
+
 ### Step 2 - Fixed-Point implementation
 Test data: 7 SNRs x 200 trials = 1400 signals, written to `c/signals.txt` (not in git; generate it with `python python/export_signals.py`, see How to reproduce).
 
-The table shows hits out of 200 trials per SNR for the Goertzel detector in noise:
+Hits out of 200 trials per SNR for the Goertzel detector, Q15 at several input scales against float (all on the same 1400 signals; Python and C float give identical detection). The Q15 input must fit [-1, 1), so the signal is scaled before conversion.
 
-| SNR (dB) | Python & C float | C Q15 |
-|---|---|---|
-| 0 | 200 | 200 |
-| -5 | 200 | 200 |
-| -10 | 200 | 199 |
-| -15 | 176 | 161 |
-| -20 | 79 | 60 |
-| -25 | 42 | 30 |
-| -30 | 23 | 20 |
+With the first scale, 0.25, Q15 lost accuracy at low SNR, largest at -20 dB (19 hits fewer than float). The cause was clipping of large noise peaks at the input. Smaller scales clip less, and 1/32 (a power of two, so a shift on the MCU) matches float within trial noise (about 6 hits at 200 trials, so the -25 and -30 dB differences mean nothing). 1/32 is the default.
 
-All three use the same 1400 signals, and Python and C float give identical detection. Q15 loses accuracy at low SNR, starting at -10 dB and largest at -20 dB (9.5 percentage points). Over all 1400 signals Q15 averages 3.6 percentage points lower accuracy than float (50 more misses). The likely cause is the input scaling of 0.25, which reduces the signal's resolution (fewer bits).
+| Q15 scale | 0 dB | -5 dB | -10 dB | -15 dB | -20 dB | -25 dB | -30 dB |
+|---|---|---|---|---|---|---|---|
+| 0.5 | 200 | 200 | 199 | 143 | 59 | 36 | 19 |
+| 0.25 | 200 | 200 | 199 | 161 | 60 | 30 | 20 |
+| 0.125 | 200 | 200 | 200 | 170 | 70 | 28 | 21 |
+| 0.0625 | 200 | 200 | 200 | 175 | 86 | 33 | 22 |
+| 1/32 | 200 | 200 | 200 | 176 | 79 | 46 | 22 |
+| float | 200 | 200 | 200 | 176 | 79 | 42 | 23 |
+
+### Step 3 - STM32 board implementation
+Setup: STM32F407 at 168 MHz, 800 samples (100 ms block), float and Q15 detectors, cycles with the DWT counter, a stored test signal (key 5 at 10 dB), result via SWV.
+
+| Build | Float cycles | Q15 cycles | Float cycles/sample | Q15 cycles/sample | Float % of budget | Q15 % of budget |
+|---|---|---|---|---|---|---|
+| -O0 | 292228 | 595721 | 45.7 | 93.1 | 1.74% | 3.55% |
+| -O2 | 86711 | 87839 | 13.5 | 13.7 | 0.52% | 0.52% |
+
+- Both detectors decode key 5 on the stored test signal.
+- At -O0 Q15 is about 2x float. At -O2 they are within about 1.3%, and -O2 is 3.4x faster for float and 6.8x for Q15.
+- The likely reason the gap closes is that the Goertzel recurrence is latency-bound (hypothesis, not measured).
+- Limits: one stored signal, no live ADC/DAC loopback, accuracy vs SNR measured on the PC only.
