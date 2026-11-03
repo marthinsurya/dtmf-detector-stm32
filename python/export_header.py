@@ -15,7 +15,7 @@ with open("../board/blink/Core/Inc/test_signal.h", "w") as f:
     f.write("};\n")
 
 # q15 input
-INPUT_SCALE = 0.25
+INPUT_SCALE = 0.03125
 sig_arr = np.array(sig)
 q = np.clip(np.round(sig_arr * INPUT_SCALE * 32768), a_min=-32768, a_max=32767).astype(np.int16)
 
