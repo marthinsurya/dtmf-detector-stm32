@@ -93,12 +93,20 @@ int main(void)
   DWT->CYCCNT = 0;                                  // reset the counter
   DWT->CTRL  |= DWT_CTRL_CYCCNTENA_Msk;             // start counting
 
+  const float *volatile sig_f = test_signal;
+  volatile char sink_f;
+  const int16_t *volatile sig_q = test_signal_q15;
+  volatile char sink_q;
+
   uint32_t start = DWT->CYCCNT;
-  char key_f = detect(test_signal, N);
+  sink_f = detect((const float *)sig_f, N);
+  char key_f = sink_f;
   uint32_t cycles_f = DWT->CYCCNT - start;
 
+
   start = DWT->CYCCNT;   /* reset the start point before the second measurement */
-  char key_q = detect_q15(test_signal_q15, N);
+  sink_q = detect_q15((const int16_t *)sig_q, N);
+  char key_q = sink_q;
   uint32_t cycles_q = DWT->CYCCNT - start;
 
   char buf[48];
