@@ -8,7 +8,10 @@
 #define KEYS_PER_SNR 200
 #define NUM_TONES 4
 #define NUM_SNRS 7
-#define INPUT_SCALE 0.25f
+
+#ifndef INPUT_SCALE
+#define INPUT_SCALE 0.03125f
+#endif
 
 int16_t float_to_q15(float x) {
     float scaled = x * 32768.0f;
