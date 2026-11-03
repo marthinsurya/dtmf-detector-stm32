@@ -22,8 +22,9 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
-#include <dtmf.h>
+#include <dtmf_q15.h>
 #include "test_signal.h"
+#include "test_signal_q15.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -72,8 +73,7 @@ int main(void)
 
   /* MCU Configuration--------------------------------------------------------*/
 
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-  HAL_Init();
+  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */  HAL_Init();
 
   /* USER CODE BEGIN Init */
 
@@ -94,15 +94,24 @@ int main(void)
   DWT->CTRL  |= DWT_CTRL_CYCCNTENA_Msk;             // start counting
 
   uint32_t start = DWT->CYCCNT;
-  char key = detect(test_signal, N);
-  uint32_t cycles = DWT->CYCCNT - start;
+  char key_f = detect(test_signal, N);
+  uint32_t cycles_f = DWT->CYCCNT - start;
+
+  start = DWT->CYCCNT;   /* reset the start point before the second measurement */
+  char key_q = detect_q15(test_signal_q15, N);
+  uint32_t cycles_q = DWT->CYCCNT - start;
 
   char buf[48];
-  snprintf(buf, sizeof buf, "key %c, cycles %lu\n", key, (unsigned long)cycles);
-
+  snprintf(buf, sizeof buf, "float key %c, cycles %lu\n", key_f, (unsigned long)cycles_f);
   for (const char *p = buf; *p; p++) {
       ITM_SendChar(*p);
   }
+
+  snprintf(buf, sizeof buf, "q15 key %c, cycles %lu\n", key_q, (unsigned long)cycles_q);
+  for (const char *p = buf; *p; p++) {
+      ITM_SendChar(*p);
+  }
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
