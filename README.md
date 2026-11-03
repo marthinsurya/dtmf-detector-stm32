@@ -73,14 +73,14 @@ Test data: 7 SNRs x 200 trials = 1400 signals, written to `c/signals.txt` (not i
 
 Hits out of 200 trials per SNR for the Goertzel detector, Q15 at several input scales against float (all on the same 1400 signals; Python and C float give identical detection). The Q15 input must fit [-1, 1), so the signal is scaled before conversion.
 
-With the first scale, 0.25, Q15 lost accuracy at low SNR, largest at -20 dB (19 hits fewer than float). The cause was clipping of large noise peaks at the input. Smaller scales clip less, and 1/32 (a power of two, so a shift on the MCU) matches float within trial noise (about 6 hits at 200 trials, so the -25 and -30 dB differences mean nothing). 1/32 is the default.
+With the first scale, 1/4, Q15 lost accuracy at low SNR, largest at -20 dB (19 hits fewer than float). The cause was clipping of large noise peaks at the input. Smaller scales clip less, and 1/32 (a power of two, so a shift on the MCU) matches float within trial noise (about 6 hits at 200 trials, so the -25 and -30 dB differences mean nothing). 1/32 is the default.
 
 | Q15 scale | 0 dB | -5 dB | -10 dB | -15 dB | -20 dB | -25 dB | -30 dB |
 |---|---|---|---|---|---|---|---|
-| 0.5 | 200 | 200 | 199 | 143 | 59 | 36 | 19 |
-| 0.25 | 200 | 200 | 199 | 161 | 60 | 30 | 20 |
-| 0.125 | 200 | 200 | 200 | 170 | 70 | 28 | 21 |
-| 0.0625 | 200 | 200 | 200 | 175 | 86 | 33 | 22 |
+| 1/2 | 200 | 200 | 199 | 143 | 59 | 36 | 19 |
+| 1/4 | 200 | 200 | 199 | 161 | 60 | 30 | 20 |
+| 1/8 | 200 | 200 | 200 | 170 | 70 | 28 | 21 |
+| 1/16 | 200 | 200 | 200 | 175 | 86 | 33 | 22 |
 | 1/32 | 200 | 200 | 200 | 176 | 79 | 46 | 22 |
 | float | 200 | 200 | 200 | 176 | 79 | 42 | 23 |
 
@@ -96,3 +96,9 @@ Setup: STM32F407 at 168 MHz, 800 samples (100 ms block), float and Q15 detectors
 - At -O0 Q15 is about 2x float. At -O2 they are within about 1.3%, and -O2 is 3.4x faster for float and 6.8x for Q15.
 - The likely reason the gap closes is that the Goertzel recurrence is latency-bound (hypothesis, not measured).
 - Limits: one stored signal, no live ADC/DAC loopback, accuracy vs SNR measured on the PC only.
+
+## Conclusions
+- **Accuracy:** the Goertzel detector decodes all keys down to -10 dB SNR. Q15 matches float within trial noise once the input is scaled properly.
+- **Fixed-point lesson:** the input must be scaled to fit the format's range. Too large clips peaks (here, noise at low SNR); too small loses resolution. A fixed word length trades range against resolution; the scale was found by sweeping.
+- **Cost:** about 108 cycles per input sample at -O2 (all 8 tones), which is 0.5% of the CPU at 8 kHz. At 168 MHz the detector alone would use the whole CPU at about 1.5 MHz sampling rate (ignoring ADC and DMA overhead).
+- **Takeaway:** on a Cortex-M4F with an FPU, Q15 gives no speed benefit; its value is on cores without an FPU and for bit-exact results.
