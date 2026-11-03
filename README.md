@@ -5,13 +5,13 @@ Detects which keypad key was pressed from its DTMF tone pair in noise. The same 
 ## Steps and goals
 1. **Python reference** (no hardware limits): tone generator, noise, detector, accuracy vs SNR. This is the best result the later steps are compared against.
 2. **C on PC** (gcc): float first, then Q15 fixed-point. Goal: error vs Python, and fixing fixed-point problems (overflow, coefficient rounding, block length).
-3. **STM32F407**: keypad -> DAC tone -> jumper wire -> ADC -> detector, float and Q15. Goal: accuracy and cycles per block (DWT counter) against the real-time budget, with real ADC/DAC effects included.
+3. **STM32F407**: the same detector (float and Q15) running on the board on a stored test signal. Goal: correct key and cycles per block (DWT counter) against the real-time budget. Live keypad -> DAC -> jumper wire -> ADC loopback, with real ADC/DAC effects, is future work.
 
 ## Status
 - [x] Step 1a: Signal generation & direct correlation detector in Python (`tone.py` - generator, noise, direct energy detector `tone_energy`, accuracy vs SNR)
 - [x] Step 1b: Goertzel method detector in Python (`goertzel.py`), same accuracy table as the direct detector on identical test data; this is the version ported to C
 - [x] Step 2: C on PC (float `read_signals.c`, Q15 `goertzel_q15.c`) vs Python on the same 1400 signals, v0.3
-- [ ] Step 3: STM32F407
+- [x] Step 3: STM32F407 float and Q15 detector on a stored test signal, cycles measured with DWT, v1.0
 
 ## Method
 Each DTMF key signal is represented by the sum of two sine waves: one tone each from **Low** and **High** group.
