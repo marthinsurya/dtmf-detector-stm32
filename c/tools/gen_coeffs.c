@@ -10,13 +10,16 @@
 #define PI_F 3.14159265f
 #define NUM_TONES 4
 
+#define Q_FRAC_BITS 15
+#define Q_ONE ((float)(1 << Q_FRAC_BITS))
+
 int16_t float_to_q15(float x) {
-    float scaled = x * 32768.0f;
-    if (scaled > 32767.0f) {
-        scaled = 32767.0f;
+    float scaled = x * Q_ONE;
+    if (scaled > Q_ONE - 1.0f) {
+        scaled = Q_ONE - 1.0f;
     }
-    if (scaled < -32768.0f) {
-        scaled = -32768.0f;
+    if (scaled < -Q_ONE) {
+        scaled = -Q_ONE;
     }
     return (int16_t)roundf(scaled);
 }
