@@ -101,5 +101,5 @@ Setup: STM32F407 at 168 MHz, 800 samples (100 ms block), float and Q15 detectors
 - The likely reason the gap closes is that the Goertzel recurrence is latency-bound (hypothesis, not measured).
 - Limits: one stored signal, no live ADC/DAC loopback, accuracy vs SNR measured on the PC only.
 
-To reproduce the board result: import `board/blink` into STM32CubeIDE and build the Debug configuration (-O0, or set -O2 in the project properties). Flash with Debug, open the SWV console (ITM port 0, core clock 168 MHz) and resume. The program prints the decoded key and DWT cycles for the float and Q15 detectors. The test signals are the committed headers `test_signal.h` and `test_signal_q15.h`; `python/export_header.py` regenerates them with new noise, so rerunning it changes the signal.
+To reproduce the board result: import `board/dtmf` into STM32CubeIDE and build the Debug configuration (-O0, or set -O2 in the project properties). Flash with Debug, open the SWV console (ITM port 0, core clock 168 MHz) and resume. The program prints the decoded key and DWT cycles for the float and Q15 detectors. The test signals are the committed headers `test_signal.h` and `test_signal_q15.h`; `python/export_header.py` regenerates them with new noise, so rerunning it changes the signal.
 
