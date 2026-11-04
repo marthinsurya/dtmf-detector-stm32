@@ -92,15 +92,18 @@ With the first scale, 1/4, Q15 lost accuracy at low SNR, largest at -20 dB (19 h
 ### Step 3 - STM32 board implementation
 Setup: STM32F407 at 168 MHz, 800 samples (100 ms block), float and Q15 detectors, cycles with the DWT counter, a stored test signal (key 5 at 10 dB), result via SWV.
 
-| Build | Float cycles | Q15 cycles | Float cycles/sample | Q15 cycles/sample | Float % of budget | Q15 % of budget |
+| Build | Float cycles | Q15 cycles | Float cycles/sample/tone | Q15 cycles/sample/tone | Float % of budget | Q15 % of budget |
 |---|---|---|---|---|---|---|
 | -O0 | 292228 | 595721 | 45.7 | 93.1 | 1.74% | 3.55% |
 | -O2 | 86711 | 87839 | 13.5 | 13.7 | 0.52% | 0.52% |
 
+- Cycles per sample are per tone (8 tones run per block), so about 108 per input sample at -O2. The budget is 16.8M cycles per 100 ms block.
 - Both detectors decode key 5 on the stored test signal.
 - At -O0 Q15 is about 2x float. At -O2 they are within about 1.3%, and -O2 is 3.4x faster for float and 6.8x for Q15.
 - The likely reason the gap closes is that the Goertzel recurrence is latency-bound (hypothesis, not measured).
 - Limits: one stored signal, no live ADC/DAC loopback, accuracy vs SNR measured on the PC only.
+
+To reproduce the board result: import `board/blink` into STM32CubeIDE and build the Debug configuration (-O0, or set -O2 in the project properties). Flash with Debug, open the SWV console (ITM port 0, core clock 168 MHz) and resume. The program prints the decoded key and DWT cycles for the float and Q15 detectors. The test signals are the committed headers `test_signal.h` and `test_signal_q15.h`; `python/export_header.py` regenerates them with new noise, so rerunning it changes the signal.
 
 ## Conclusions
 - **Accuracy:** the Goertzel detector decodes all keys down to -10 dB SNR. Q15 matches float within trial noise once the input is scaled properly.
