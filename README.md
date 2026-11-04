@@ -33,7 +33,7 @@ The detector measures the signal energy at each of the 8 frequencies and picks t
 
 Energy is computed with the Goertzel algorithm, the standard choice for DTMF: it needs only multiply and add and two state variables per frequency, which reduces the computational demands of the direct approach and makes it better suited to a hardware-efficient implementation (fixed-point integer code on a microcontroller).
 
-## Additional Results
+## Detailed Results
 ### Step 1 - Python Reference 
 
 Step 1 is the baseline: the signal is processed in floating-point Python with no hardware restrictions, but with noise added. It shows how well the method detects keys at best, so steps 2 and 3 can be compared against it.
