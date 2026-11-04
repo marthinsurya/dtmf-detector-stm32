@@ -7,3 +7,4 @@ CHEATSHEET.md
 *.exe
 c/signals.txt
 board/*/Debug/
+board/*/.settings/*.sfrview.prefs

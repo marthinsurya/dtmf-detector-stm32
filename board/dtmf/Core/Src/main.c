@@ -22,7 +22,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
-#include <dtmf_q15.h>
+#include "dtmf_q15.h"
 #include "test_signal.h"
 #include "test_signal_q15.h"
 /* USER CODE END Includes */
