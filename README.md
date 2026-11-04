@@ -1,22 +1,18 @@
 # DTMF tone detector: Python → C → STM32
 
-Detects which keypad key was pressed from its DTMF tone pair in noise. The same detection method is built three times, each under tighter constraints, to measure what each constraint costs and how much of it design choices win back.
+Decodes which of the 16 DTMF keys was sent from its tone pair, in noise. The same detector is built three times: in Python as reference, in C (float and Q15 fixed-point), and on an STM32F407. The aim is to measure what each constraint costs in accuracy and cycles, and how much of that cost design choices recover.
 
-## Purpose and scope
-A real keypad already knows which key was pressed, so detecting it from a tone is not a product. DTMF is a test vehicle: a signal with known labels, a standard detector (Goertzel) and an accuracy measure, so the same algorithm can be compared across Python, C float, Q15 and the MCU. What the project measures is what each constraint costs: accuracy (fixed-point range and rounding) and cycles against a real-time budget. It is not a telephony product, not an RTOS project and not machine learning.
+## Results
+- **Accuracy:** the Goertzel detector decodes all keys down to -10 dB SNR. Q15 matches float within trial noise once the input is scaled properly.
+- **Fixed-point design:** the noisy input must be scaled to fit the Q15 format's range. A large scale clips noise peaks at low SNR; a small scale loses resolution. The sweep found 1/32 to be best.
+- **Cost:** about 108 cycles per input sample at -O2 (all 8 tones), which is 0.5% of the CPU at 8 kHz. At 168 MHz the detector alone would use the whole CPU at about 1.5 MHz sampling rate (ignoring ADC and DMA overhead).
+- **Takeaway:** on a Cortex-M4F with an FPU, Q15 gives no speed benefit; its value is on cores without an FPU and for bit-exact results.
 
-The planned live loopback (keypad -> DAC -> ADC) is a self-test rig: it feeds the detector real ADC samples instead of stored arrays, with the keypad key as the known label, like the labels Python generates. Its value is timer-triggered sampling at 8 kHz, DMA double buffering and checking the deadline on real samples, not the decoded key.
 
 ## Steps and goals
 1. **Python reference** (no hardware limits): tone generator, noise, detector, accuracy vs SNR. This is the best result the later steps are compared against.
 2. **C on PC** (gcc): float first, then Q15 fixed-point. Goal: error vs Python, and fixing fixed-point problems (overflow, coefficient rounding, block length).
-3. **STM32F407**: the same detector (float and Q15) running on the board on a stored test signal. Goal: correct key and cycles per block (DWT counter) against the real-time budget. Live keypad -> DAC -> jumper wire -> ADC loopback, with real ADC/DAC effects, is future work.
-
-## Status
-- [x] Step 1a: Signal generation & direct correlation detector in Python (`tone.py` - generator, noise, direct energy detector `tone_energy`, accuracy vs SNR)
-- [x] Step 1b: Goertzel method detector in Python (`goertzel.py`), same accuracy table as the direct detector on identical test data; this is the version ported to C
-- [x] Step 2: C on PC (float `read_signals.c`, Q15 `goertzel_q15.c`) vs Python on the same 1400 signals, v0.3
-- [x] Step 3: STM32F407 float and Q15 detector on a stored test signal, cycles measured with DWT, v1.0
+3. **STM32F407**: the same detector (float and Q15) running on the board on a stored test signal. Goal: correct key and cycles per block (DWT counter) against the real-time budget.
 
 ## Method
 Each DTMF key signal is represented by the sum of two sine waves: one tone each from **Low** and **High** group.
@@ -33,9 +29,11 @@ Test Setup:
 - Test samples = 200 random keys per SNR point (with random seed defined random.seed(0))
 - Noise: Gaussian (random), scaled so signal power / noise power matches the target SNR
 
-The detector measures the signal energy at each of the 8 frequencies and picks the strongest in each group to determine which key was pressed. Energy is computed with the Goertzel algorithm, the standard choice for DTMF: it needs only multiply and add and two state variables per frequency, which reduces the computational demands of the direct approach and makes it better suited to a hardware-efficient implementation (fixed-point integer code on a microcontroller).
+The detector measures the signal energy at each of the 8 frequencies and picks the strongest in each group to determine which key was sent.
 
-## Results
+Energy is computed with the Goertzel algorithm, the standard choice for DTMF: it needs only multiply and add and two state variables per frequency, which reduces the computational demands of the direct approach and makes it better suited to a hardware-efficient implementation (fixed-point integer code on a microcontroller).
+
+## Additional Results
 ### Step 1 - Python Reference 
 
 Step 1 is the baseline: the signal is processed in floating-point Python with no hardware restrictions, but with noise added. It shows how well the method detects keys at best, so steps 2 and 3 can be compared against it.
@@ -105,8 +103,3 @@ Setup: STM32F407 at 168 MHz, 800 samples (100 ms block), float and Q15 detectors
 
 To reproduce the board result: import `board/blink` into STM32CubeIDE and build the Debug configuration (-O0, or set -O2 in the project properties). Flash with Debug, open the SWV console (ITM port 0, core clock 168 MHz) and resume. The program prints the decoded key and DWT cycles for the float and Q15 detectors. The test signals are the committed headers `test_signal.h` and `test_signal_q15.h`; `python/export_header.py` regenerates them with new noise, so rerunning it changes the signal.
 
-## Conclusions
-- **Accuracy:** the Goertzel detector decodes all keys down to -10 dB SNR. Q15 matches float within trial noise once the input is scaled properly.
-- **Fixed-point lesson:** the input must be scaled to fit the format's range. Too large clips peaks (here, noise at low SNR); too small loses resolution. A fixed word length trades range against resolution; the scale was found by sweeping.
-- **Cost:** about 108 cycles per input sample at -O2 (all 8 tones), which is 0.5% of the CPU at 8 kHz. At 168 MHz the detector alone would use the whole CPU at about 1.5 MHz sampling rate (ignoring ADC and DMA overhead).
-- **Takeaway:** on a Cortex-M4F with an FPU, Q15 gives no speed benefit; its value is on cores without an FPU and for bit-exact results.
