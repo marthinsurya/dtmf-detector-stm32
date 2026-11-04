@@ -8,18 +8,20 @@
 #define KEYS_PER_SNR 200
 #define NUM_TONES 4
 #define NUM_SNRS 7
+#define Q_FRAC_BITS 15
+#define Q_ONE ((float)(1<<Q_FRAC_BITS))
 
 #ifndef INPUT_SCALE
 #define INPUT_SCALE 0.03125f
 #endif
 
 int16_t float_to_q15(float x) {
-    float scaled = x * 32768.0f;
-    if (scaled > 32767.0f) {
-        scaled = 32767.0f;
+    float scaled = x * Q_ONE;
+    if (scaled > Q_ONE-1.0f) {
+        scaled = Q_ONE-1.0f;
     }
-    if (scaled < -32768.0f) {
-        scaled = -32768.0f;
+    if (scaled < -Q_ONE) {
+        scaled = -Q_ONE;
     }
     return (int16_t)roundf(scaled);
 }
@@ -37,13 +39,13 @@ int64_t q15_goertzel_state(const float *x, int n, int16_t coeff_half, int32_t *s
 
     for (int i = 0; i < n; i++) {
         int16_t s = float_to_q15(x[i] * INPUT_SCALE);
-        int64_t term = ((int64_t)coeff_half * *s1) >> 14;
+        int64_t term = ((int64_t)coeff_half * *s1) >> (Q_FRAC_BITS-1);
         int32_t s0 = s + (int32_t)term - *s2;
         *s2 = *s1;
         *s1 = s0;
     }
 
-    int64_t term = ((int64_t)coeff_half * *s1) >> 14;
+    int64_t term = ((int64_t)coeff_half * *s1) >> (Q_FRAC_BITS-1);
     int64_t energy = (int64_t)*s1 * *s1 + (int64_t)*s2* *s2 - term * *s2;
     return energy;
 }

@@ -4,19 +4,21 @@
 #include <stdint.h>
 #include "dtmf.h"
 
-static const int16_t coeff_low_q15[4]  = {27980, 26956, 25701, 24219};
+#define Q_FRAC_BITS 15   // coefficient tables below are Q15: regenerate them if this changes
+
+static const int16_t coeff_low_q15[4]  ={27980, 26956, 25701, 24219};
 static const int16_t coeff_high_q15[4] = {19073, 16325, 13085, 9315};
 
 int64_t goertzel_energy_q15(const int16_t *x, int n, int16_t coeff_half) {
     int32_t s1 = 0;
     int32_t s2 = 0;
     for (int i = 0; i < n; i++) {
-        int32_t term = (int32_t)(((int64_t)coeff_half * s1) >> 14);
+        int32_t term = (int32_t)(((int64_t)coeff_half * s1) >> (Q_FRAC_BITS - 1));
         int32_t s0 = x[i] + term - s2;
         s2 = s1;
         s1 = s0;
     }
-    int64_t term = ((int64_t)coeff_half * s1) >> 14;
+    int64_t term = ((int64_t)coeff_half * s1) >> (Q_FRAC_BITS - 1);
     return (int64_t)s1 * s1 + (int64_t)s2 * s2 - term * s2;
 }
 
