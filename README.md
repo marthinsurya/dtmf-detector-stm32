@@ -2,6 +2,11 @@
 
 Detects which keypad key was pressed from its DTMF tone pair in noise. The same detection method is built three times, each under tighter constraints, to measure what each constraint costs and how much of it design choices win back.
 
+## Purpose and scope
+A real keypad already knows which key was pressed, so detecting it from a tone is not a product. DTMF is a test vehicle: a signal with known labels, a standard detector (Goertzel) and an accuracy measure, so the same algorithm can be compared across Python, C float, Q15 and the MCU. What the project measures is what each constraint costs: accuracy (fixed-point range and rounding) and cycles against a real-time budget. It is not a telephony product, not an RTOS project and not machine learning.
+
+The planned live loopback (keypad -> DAC -> ADC) is a self-test rig: it feeds the detector real ADC samples instead of stored arrays, with the keypad key as the known label, like the labels Python generates. Its value is timer-triggered sampling at 8 kHz, DMA double buffering and checking the deadline on real samples, not the decoded key.
+
 ## Steps and goals
 1. **Python reference** (no hardware limits): tone generator, noise, detector, accuracy vs SNR. This is the best result the later steps are compared against.
 2. **C on PC** (gcc): float first, then Q15 fixed-point. Goal: error vs Python, and fixing fixed-point problems (overflow, coefficient rounding, block length).
