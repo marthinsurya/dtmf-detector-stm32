@@ -3,11 +3,11 @@
 Decodes which of the 16 DTMF keys was sent from its tone pair, in noise. The same detector is built three times: in Python as reference, in C (float and Q15 fixed-point), and on an STM32F407. The aim is to measure what each constraint costs in accuracy and cycles, and how much of that cost design choices recover.
 
 ## Results
-- **Accuracy:** the Goertzel detector decodes all keys down to -10 dB SNR. Q15 matches float within trial noise once the input is scaled properly.
+- **Accuracy:** the Goertzel detector decodes 200/200 keys at -10 dB SNR and above. Q15 matches float within trial noise once the input is scaled properly.
 - **Fixed-point design:** the noisy input must be scaled to fit the Q15 format's range. A large scale clips noise peaks at low SNR; a small scale loses resolution. The sweep found 1/32 to be best.
+- **Board test:** one stored 800-sample block (key 5 at 10 dB) decoded on the STM32; the accuracy figures above are from PC runs; the board test checked the decoded key and measured cycles.
 - **Cost:** about 108 cycles per input sample at -O2 (all 8 tones), which is 0.5% of the CPU at 8 kHz. At 168 MHz the detector alone would use the whole CPU at about 1.5 MHz sampling rate (ignoring ADC and DMA overhead).
-- **Takeaway:** on a Cortex-M4F with an FPU, Q15 gives no speed benefit; its value is on cores without an FPU and for bit-exact results.
-
+- **Takeaway:** on a Cortex-M4F with an FPU, Q15 gives no speed benefit (the board's Q15 cycles exclude the float-to-Q15 input scaling, which the PC version does inside the loop, so they are a lower bound); its value is on cores without an FPU and for bit-exact results.
 
 ## Steps and goals
 1. **Python reference** (no hardware limits): tone generator, noise, detector, accuracy vs SNR. This is the best result the later steps are compared against.
@@ -107,5 +107,5 @@ To reproduce the board result:
 3. Click Debug to build and flash the board.
 4. Open the SWV console (ITM port 0, core clock 168 MHz) and resume. It prints the decoded key and the DWT cycles for the float and Q15 detectors.
 
-The test signal is stored in `test_signal.h` and `test_signal_q15.h`. Running `python/export_header.py` writes a new noise realisation of the same key-5 signal over them.
+The test signal is stored in `test_signal.h` and `test_signal_q15.h`. Running `python/export_header.py` (run from `python/`) writes a new noise realisation of the same key-5 signal over them.
 
